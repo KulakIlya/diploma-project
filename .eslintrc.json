@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:tailwindcss/recommended",
+    "prettier"
+  ],
+  "plugins": ["tailwindcss"],
+  "rules": {
+    "no-undef": "error"
+  },
+  "env": {
+    "es6": true,
+    "browser": true
+  }
+}
