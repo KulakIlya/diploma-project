@@ -10,8 +10,8 @@ function ReservationForm({
 	cabin: { maxCapacity, regularPrice, discount, _id },
 }) {
 	const { range, resetRange } = useReservationContext();
-	const startDate = range.from;
-	const endDate = range.to;
+	const startDate = range?.from;
+	const endDate = range?.to;
 
 	const numNights = differenceInDays(endDate, startDate);
 	const roomPrice = numNights * (regularPrice - discount);
@@ -23,6 +23,8 @@ function ReservationForm({
 		roomPrice,
 		room: _id,
 	};
+
+	const isSubmitDisabled = !startDate || !endDate;
 
 	// const createBookingWithData = createBooking.bind(null, bookingData);
 
@@ -85,7 +87,10 @@ function ReservationForm({
 				<div className="flex items-center justify-end gap-6">
 					<p className="text-base text-primary-300">Start by selecting dates</p>
 
-					<button className="bg-accent-500 px-8 py-4 font-semibold text-primary-800 transition-all hover:bg-accent-600 disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
+					<button
+						disabled={isSubmitDisabled}
+						className="bg-accent-500 px-8 py-4 font-semibold text-primary-800 transition-all hover:bg-accent-600 disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300"
+					>
 						Reserve now
 					</button>
 				</div>
