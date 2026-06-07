@@ -59,6 +59,7 @@ const UpdateProfileForm = async ({ children }) => {
 					name="nationalID"
 					className="w-full rounded-sm bg-primary-200 px-5 py-3 text-primary-800 shadow-sm"
 					defaultValue={nationalID}
+					required
 				/>
 			</div>
 

@@ -22,7 +22,7 @@ const ReservationsList = ({ bookings }) => {
 			{optimisticDelete.length === 0 ? (
 				<p className="text-lg">
 					You have no reservations yet. Check out our{" "}
-					<a className="text-accent-500 underline" href="/cabins">
+					<a className="text-accent-500 underline" href="/rooms">
 						luxury cabins &rarr;
 					</a>
 				</p>
@@ -31,7 +31,7 @@ const ReservationsList = ({ bookings }) => {
 					{optimisticDelete.map((booking) => (
 						<ReservationCard
 							booking={booking}
-							key={booking.id}
+							key={booking._id}
 							onDelete={handleDelete}
 						/>
 					))}

@@ -5,9 +5,10 @@ import LoginMessage from "./LoginMessage";
 import ReservationForm from "./ReservationForm";
 
 const Reservation = async ({ cabin }) => {
-	const [settings, bookedDates] = await Promise.all([
+	const token = await auth().then((session) => session?.idToken);
+	const [settings, bookedDates = []] = await Promise.all([
 		getSettings(),
-		getBookedDatesByCabinId(cabin.id),
+		getBookedDatesByCabinId(cabin._id, token),
 	]);
 
 	const session = await auth();

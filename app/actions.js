@@ -20,6 +20,14 @@ const getSession = async () => {
 	return session;
 };
 
+// Helper to handle API errors and redirect on 401
+const handleApiError = (error) => {
+	if (error.statusCode === 401) {
+		redirect("/login");
+	}
+	throw error;
+};
+
 export const login = async () => {
 	await signIn("google", { redirectTo: "/", redirect: "/" });
 };
@@ -34,12 +42,16 @@ export const updateProfile = async (formData) => {
 	const nationalID = formData.get("nationalID");
 	const [nationality, countryFlag] = formData.get("nationality").split("%");
 
-	if (!NATIONALITY_ID_REGEX.test(nationalID))
-		throw new Error("Please provide a valid national ID");
+	// if (!NATIONALITY_ID_REGEX.test(nationalID))
+	// 	throw new Error("Please provide a valid national ID");
 
 	const updateData = { nationality, countryFlag, nationalID };
 
-	await updateGuest(session.user.guestId, updateData);
+	try {
+		await updateGuest(session.user.guestId, updateData, session.idToken);
+	} catch (error) {
+		handleApiError(error);
+	}
 
 	revalidatePath("/account/profile");
 };
@@ -47,13 +59,17 @@ export const updateProfile = async (formData) => {
 export const deleteReservation = async (id) => {
 	const session = await getSession();
 
-	const reservation = await getBooking(id);
+	try {
+		const reservation = await getBooking(id, session.idToken);
 
-	if (reservation.guestId !== session.user.guestId) {
-		throw new Error("Unauthorized");
+		if (reservation.guest._id !== session.user.guestId) {
+			throw new Error("Unauthorized");
+		}
+
+		await deleteBooking(id, session.idToken);
+	} catch (error) {
+		handleApiError(error);
 	}
-
-	await deleteBooking(id);
 
 	revalidatePath("account/reservations");
 };
@@ -61,18 +77,23 @@ export const deleteReservation = async (id) => {
 export const updateReservation = async (id, formData) => {
 	const session = await getSession();
 
-	const reservation = await getBooking(id);
+	try {
+		const reservation = await getBooking(id, session.idToken);
+		console.log("session", session);
+		console.log("reservation", reservation);
+		if (reservation.guest._id !== session.user.guestId) {
+			throw new Error("Unauthorized");
+		}
 
-	if (reservation.guestId !== session.user.guestId) {
-		throw new Error("Unauthorized");
+		const updateData = {
+			numGuests: formData.get("numGuests"),
+			observations: formData.get("observations"),
+		};
+
+		await updateBooking(id, updateData, session.idToken);
+	} catch (error) {
+		handleApiError(error);
 	}
-
-	const updateData = {
-		numGuests: formData.get("numGuests"),
-		observations: formData.get("observations"),
-	};
-
-	await updateBooking(id, updateData);
 
 	revalidatePath("/account/reservations");
 };
@@ -82,7 +103,7 @@ export const createReservation = async (bookingData, formData) => {
 
 	const newBooking = {
 		...bookingData,
-		guestId: session.user.guestId,
+		guest: session.user.guestId,
 		numGuests: Number(formData.get("numGuests")),
 		observations: formData.get("observations").slice(0, 1000),
 		extrasPrice: 0,
@@ -92,9 +113,13 @@ export const createReservation = async (bookingData, formData) => {
 		status: "unconfirmed",
 	};
 
-	await createBooking(newBooking);
+	try {
+		await createBooking(newBooking, session.idToken);
+	} catch (error) {
+		handleApiError(error);
+	}
 
-	revalidatePath(`/cabins/${bookingData.cabinId}`);
+	revalidatePath(`/rooms/${bookingData.cabinId}`);
 
-	redirect("/cabins/thankyou");
+	redirect("/rooms/thankyou");
 };

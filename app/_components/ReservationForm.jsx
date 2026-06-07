@@ -7,7 +7,7 @@ import { createReservation } from "../actions";
 
 function ReservationForm({
 	user,
-	cabin: { maxCapacity, regularPrice, discount, id },
+	cabin: { maxCapacity, regularPrice, discount, _id },
 }) {
 	const { range, resetRange } = useReservationContext();
 	const startDate = range.from;
@@ -21,7 +21,7 @@ function ReservationForm({
 		endDate,
 		numNights,
 		cabinPrice,
-		cabinId: id,
+		cabin: _id,
 	};
 
 	// const createBookingWithData = createBooking.bind(null, bookingData);

@@ -8,7 +8,7 @@ const Cabin = ({ cabin: { name, maxCapacity, image, description } }) => {
 		<div className="mb-24 grid grid-cols-[3fr_4fr] gap-20 border border-primary-800 px-10 py-3">
 			{image && (
 				<div className="relative -translate-x-3 scale-[1.15]">
-					<Image src={image} alt={`Cabin ${name}`} />
+					<Image src={image} alt={`Cabin ${name}`} width={300} height={400} />
 				</div>
 			)}
 

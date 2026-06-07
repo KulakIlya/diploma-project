@@ -7,7 +7,7 @@ export default function Navigation() {
 			<ul className="flex items-center gap-16">
 				<li>
 					<Link
-						href="/cabins"
+						href="/rooms"
 						className="transition-colors hover:text-accent-400"
 					>
 						Cabins

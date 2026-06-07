@@ -1,139 +1,119 @@
 import { eachDayOfInterval } from "date-fns";
-import supabase from "./supabase";
+import { apiCall, authApiCall } from "./api-config";
 import { notFound } from "next/navigation";
 
 // GET
 
 export async function getCabin(id) {
-	const { data, error } = await supabase
-		.from("cabins")
-		.select("*")
-		.eq("id", id)
-		.single();
-
-	// For testing
-	// await new Promise((res) => setTimeout(res, 1000));
-
-	if (error) {
+	try {
+		const data = await apiCall(`/rooms/${id}`);
+		return data;
+	} catch (error) {
 		console.error(error);
 		notFound();
 	}
-
-	return data;
 }
 
 export async function getCabinPrice(id) {
-	const { data, error } = await supabase
-		.from("cabins")
-		.select("regularPrice, discount")
-		.eq("id", id)
-		.single();
-
-	if (error) {
+	try {
+		const data = await apiCall(`/rooms/${id}/price`);
+		return data;
+	} catch (error) {
 		console.error(error);
+		return null;
 	}
-
-	return data;
 }
 
 export const getCabins = async function () {
-	const { data, error } = await supabase
-		.from("cabins")
-		.select("id, name, maxCapacity, regularPrice, discount, image")
-		.order("name");
-
-	if (error) {
+	try {
+		const data = await apiCall(`/rooms`);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Cabins could not be loaded");
 	}
-
-	return data;
 };
 
 // Guests are uniquely identified by their email address
-export async function getGuest(email) {
-	const { data, error } = await supabase
-		.from("guests")
-		.select("*")
-		.eq("email", email)
-		.single();
-
-	// No error here! We handle the possibility of no guest in the sign in callback
-	return data;
+export async function getGuest(email, token) {
+	try {
+		// If no token provided, use public endpoint
+		const endpoint = `/guests/email/${email}`;
+		const data = token
+			? await authApiCall(endpoint, {}, token)
+			: await apiCall(endpoint);
+		return data;
+	} catch (error) {
+		// No error here! We handle the possibility of no guest in the sign in callback
+		if (error.statusCode !== 404) {
+			console.error(error);
+		}
+		return null;
+	}
 }
 
-export async function getBooking(id) {
-	const { data, error, count } = await supabase
-		.from("bookings")
-		.select("*")
-		.eq("id", id)
-		.single();
-
-	if (error) {
+export async function getBooking(id, token) {
+	try {
+		const data = await authApiCall(`/bookings/${id}`, {}, token);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Booking could not get loaded");
 	}
-
-	return data;
 }
 
-export async function getBookings(guestId) {
-	const { data, error, count } = await supabase
-		.from("bookings")
-		// We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
-		.select(
-			"id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)",
-		)
-		.eq("guestId", guestId)
-		.order("startDate");
-
-	if (error) {
+export async function getBookings(guestId, token) {
+	try {
+		const data = await authApiCall(`/bookings/me`, {}, token);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Bookings could not get loaded");
 	}
-
-	return data;
 }
 
-export async function getBookedDatesByCabinId(cabinId) {
-	let today = new Date();
-	today.setUTCHours(0, 0, 0, 0);
-	today = today.toISOString();
+export async function getBookedDatesByCabinId(cabinId, token) {
+	try {
+		if (!token) {
+			return;
+		}
 
-	// Getting all bookings
-	const { data, error } = await supabase
-		.from("bookings")
-		.select("*")
-		.eq("cabinId", cabinId)
-		.or(`startDate.gte.${today},status.eq.checked-in`);
+		let today = new Date();
+		today.setUTCHours(0, 0, 0, 0);
+		today = today.toISOString();
 
-	if (error) {
+		// Getting all bookings
+		const data = await authApiCall(
+			`/bookings/booked-dates/${cabinId}`,
+			{},
+			token,
+		);
+
+		// Converting to actual dates to be displayed in the date picker
+		const bookedDates = data.bookedDates
+			.map((booking) => {
+				return eachDayOfInterval({
+					start: new Date(booking.startDate),
+					end: new Date(booking.endDate),
+				});
+			})
+			.flat();
+
+		return bookedDates;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Bookings could not get loaded");
 	}
-
-	// Converting to actual dates to be displayed in the date picker
-	const bookedDates = data
-		.map((booking) => {
-			return eachDayOfInterval({
-				start: new Date(booking.startDate),
-				end: new Date(booking.endDate),
-			});
-		})
-		.flat();
-
-	return bookedDates;
 }
 
 export async function getSettings() {
-	const { data, error } = await supabase.from("settings").select("*").single();
-
-	if (error) {
+	try {
+		const data = await apiCall(`/settings`);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Settings could not be loaded");
 	}
-
-	return data;
 }
 
 export async function getCountries() {
@@ -151,74 +131,82 @@ export async function getCountries() {
 /////////////
 // CREATE
 
-export async function createGuest(newGuest) {
-	const { data, error } = await supabase.from("guests").insert([newGuest]);
-
-	if (error) {
+export async function createGuest(newGuest, token) {
+	try {
+		// If no token provided, use public endpoint (for sign-up flow)
+		const endpoint = `/guests`;
+		const data = token
+			? await authApiCall(
+					endpoint,
+					{ method: "POST", body: JSON.stringify(newGuest) },
+					token,
+				)
+			: await apiCall(endpoint, {
+					method: "POST",
+					body: JSON.stringify(newGuest),
+				});
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Guest could not be created");
 	}
-
-	return data;
 }
 
-export async function createBooking(newBooking) {
-	const { data, error } = await supabase
-		.from("bookings")
-		.insert([newBooking])
-		// So that the newly created object gets returned!
-		.select()
-		.single();
-
-	if (error) {
+export async function createBooking(newBooking, token) {
+	try {
+		const data = await authApiCall(
+			`/bookings`,
+			{ method: "POST", body: JSON.stringify(newBooking) },
+			token,
+		);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Booking could not be created");
 	}
-
-	return data;
 }
 
 /////////////
 // UPDATE
 
 // The updatedFields is an object which should ONLY contain the updated data
-export async function updateGuest(id, updatedFields) {
-	const { data, error } = await supabase
-		.from("guests")
-		.update(updatedFields)
-		.eq("id", id);
-
-	if (error) {
+export async function updateGuest(id, updatedFields, token) {
+	try {
+		const data = await authApiCall(
+			`/guests/${id}`,
+			{ method: "PATCH", body: JSON.stringify(updatedFields) },
+			token,
+		);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Guest could not be updated");
 	}
-	return data;
 }
 
-export async function updateBooking(id, updatedFields) {
-	const { data, error } = await supabase
-		.from("bookings")
-		.update(updatedFields)
-		.eq("id", id)
-		.select()
-		.single();
-
-	if (error) {
+export async function updateBooking(id, updatedFields, token) {
+	try {
+		const data = await authApiCall(
+			`/bookings/${id}`,
+			{ method: "PATCH", body: JSON.stringify(updatedFields) },
+			token,
+		);
+		return data;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Booking could not be updated");
 	}
-	return data;
 }
 
 /////////////
 // DELETE
 
-export async function deleteBooking(id) {
-	const { data, error } = await supabase.from("bookings").delete().eq("id", id);
-
-	if (error) {
+export async function deleteBooking(id, token) {
+	try {
+		await authApiCall(`/bookings/${id}`, { method: "DELETE" }, token);
+		return null;
+	} catch (error) {
 		console.error(error);
 		throw new Error("Booking could not be deleted");
 	}
-	return data;
 }

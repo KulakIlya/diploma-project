@@ -85,7 +85,7 @@ export default async function Page() {
 
 					<div>
 						<Link
-							href="/cabins"
+							href="/rooms"
 							className="mt-4 inline-block bg-accent-500 px-8 py-5 text-lg font-semibold text-primary-800 transition-all hover:bg-accent-600"
 						>
 							Explore our luxury cabins

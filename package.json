@@ -11,16 +11,20 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@supabase/supabase-js": "^2.91.1",
+    "@mikro-orm/core": "^7.0.12",
+    "@mikro-orm/migrations": "^7.0.12",
+    "@mikro-orm/postgresql": "^7.0.12",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "next": "^15.5.10",
     "next-auth": "^5.0.0-beta.30",
     "react": "^18",
     "react-day-picker": "^8.10.1",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@mikro-orm/cli": "^7.0.12",
     "@types/react": "19.2.10",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.29",

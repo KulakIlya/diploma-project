@@ -1,9 +1,14 @@
 import UpdateBookingForm from "@/app/_components/UpdateBookingForm";
 
 import { getBooking } from "@/app/services/data-service";
+import { auth } from "@/auth";
 
 export default async function Page({ params: { bookingId } }) {
-	const { numGuests, observations } = await getBooking(bookingId);
+	const session = await auth();
+	const { numGuests, observations } = await getBooking(
+		bookingId,
+		session.idToken,
+	);
 
 	return (
 		<div>

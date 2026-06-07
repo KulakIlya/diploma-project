@@ -11,8 +11,9 @@ export const formatDistanceFromNow = (dateStr) =>
 	}).replace("about ", "");
 
 function ReservationCard({ booking, onDelete }) {
+	console.log("booking", booking);
 	const {
-		id,
+		_id,
 		guestId,
 		startDate,
 		endDate,
@@ -21,11 +22,11 @@ function ReservationCard({ booking, onDelete }) {
 		numGuests,
 		status,
 		created_at,
-		cabins: { name, image },
+		cabin: { name, image },
 	} = booking;
 
 	const handleDeleteReservation = () => {
-		onDelete(id);
+		onDelete(_id);
 	};
 
 	return (
@@ -35,6 +36,7 @@ function ReservationCard({ booking, onDelete }) {
 					src={image}
 					alt={`Cabin ${name}`}
 					className="border-r border-primary-800 object-cover"
+					fill
 				/>
 			</div>
 
@@ -69,14 +71,14 @@ function ReservationCard({ booking, onDelete }) {
 						{numGuests} guest{numGuests > 1 && "s"}
 					</p>
 					<p className="ml-auto text-sm text-primary-400">
-						Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}
+						Booked {format(new Date(startDate), "EEE, MMM dd yyyy, p")}
 					</p>
 				</div>
 			</div>
 
 			<div className="flex w-[100px] flex-col border-l border-primary-800">
 				<Link
-					href={`/account/reservations/edit/${id}`}
+					href={`/account/reservations/edit/${_id}`}
 					className="group flex grow items-center gap-2 border-b border-primary-800 px-3 text-xs font-bold uppercase text-primary-300 transition-colors hover:bg-accent-600 hover:text-primary-900"
 				>
 					<PencilSquareIcon className="size-5 text-primary-600 transition-colors group-hover:text-primary-800" />
