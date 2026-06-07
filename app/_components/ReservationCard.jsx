@@ -22,7 +22,7 @@ function ReservationCard({ booking, onDelete }) {
 		numGuests,
 		status,
 		created_at,
-		cabin: { name, image },
+		room: { name, image },
 	} = booking;
 
 	const handleDeleteReservation = () => {

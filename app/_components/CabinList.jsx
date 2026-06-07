@@ -7,7 +7,7 @@ const CabinList = async ({ filter }) => {
 	const filteredCabins = filterCabins(cabins, filter);
 
 	if (!filteredCabins.length) return null;
-	console.log("filteredCabins", filteredCabins);
+
 	return (
 		<div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:gap-12 xl:gap-14">
 			{filteredCabins.map((cabin) => (

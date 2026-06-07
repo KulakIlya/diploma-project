@@ -14,14 +14,14 @@ function ReservationForm({
 	const endDate = range.to;
 
 	const numNights = differenceInDays(endDate, startDate);
-	const cabinPrice = numNights * (regularPrice - discount);
+	const roomPrice = numNights * (regularPrice - discount);
 
 	const bookingData = {
 		startDate,
 		endDate,
 		numNights,
-		cabinPrice,
-		cabin: _id,
+		roomPrice,
+		room: _id,
 	};
 
 	// const createBookingWithData = createBooking.bind(null, bookingData);

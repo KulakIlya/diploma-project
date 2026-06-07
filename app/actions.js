@@ -107,7 +107,7 @@ export const createReservation = async (bookingData, formData) => {
 		numGuests: Number(formData.get("numGuests")),
 		observations: formData.get("observations").slice(0, 1000),
 		extrasPrice: 0,
-		totalPrice: bookingData.cabinPrice,
+		totalPrice: bookingData.roomPrice,
 		isPaid: false,
 		hasBreakfast: false,
 		status: "unconfirmed",
