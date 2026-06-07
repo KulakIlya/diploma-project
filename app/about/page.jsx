@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { getCabins } from "../services/data-service";
-import { ONE_DAY } from "../_constants/common";
 
 import image1 from "@/public/about-1.jpg";
 import image2 from "@/public/about-2.jpg";
@@ -11,7 +10,7 @@ export const metadata = {
 	title: "About",
 };
 
-export const revalidate = ONE_DAY;
+export const revalidate = 86400;
 
 export default async function Page() {
 	const cabinsCount = (await getCabins()).length;

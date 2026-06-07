@@ -2,12 +2,11 @@ import { Suspense } from "react";
 
 import CabinList from "../_components/CabinList";
 import Spinner from "../_components/Spinner";
-import { ONE_HOUR } from "../_constants/common";
 import { FILTER_OPTIONS } from "../_constants/cabins";
 import Filter from "../_components/Filter";
 import ReservationReminder from "../_components/ReservationReminder";
 
-export const revalidate = ONE_HOUR;
+export const revalidate = 3600;
 
 export default function Page({ searchParams }) {
 	const filter = searchParams?.capacity ?? FILTER_OPTIONS.ALL;
